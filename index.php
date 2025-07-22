@@ -1,43 +1,56 @@
 <?php
 
-$presenze_studenti = ["Andrea Bertazzoni" => [], "Giada Altomare" => [], "Federico Carrassi" => [], "Antonino Beninato" => [],];
+$students_attendance = [
+    "Andrea Bertazzoni" => [],
+    "Giada Altomare" => [],
+    "Federico Carrassi" => [],
+    "Antonino Beninato" => [],
+];
 
-$numero_studenti = count($presenze_studenti);
+$number_of_students = count($students_attendance);
+$days = 7;
 
-$giorni = 7;
+$daily_attendance = array_fill_keys(range(1, $days), 0);
 
-$lista_presenze = array_fill_keys(range(1, $giorni), 0);
-
-
-for ($i = 1; $i <= $giorni; $i++) {
-    foreach ($presenze_studenti as $studente => $presenza) {
+for ($day = 1; $day <= $days; $day++) {
+    foreach ($students_attendance as $student => $attendance) {
         $random_bool = random_int(0, 1);
         if ($random_bool) {
-            $presenze_studenti[$studente][] = $i;
-            $lista_presenze[$i]++;
+            $students_attendance[$student][] = $day;
+            $daily_attendance[$day]++;
         }
     }
 }
 
-foreach ($presenze_studenti as $studente => $presenza) {
-    echo "$studente:\n";
-    if (!count($presenza) == 0) {
-        echo "\tPresente nei giorni: " . implode(",", $presenza) . "\n";
+foreach ($students_attendance as $student => $attendance) {
+    echo "$student:<br>";
+    if (!count($attendance) == 0) {
+        echo "\tPresente nei giorni: " . implode(",", $attendance) . "<br>";
     }
-    echo "\t" . count($presenza) . " presenz" . ((count($presenza) === 1 ? 'a' : 'e')) . "\n";
+    echo "\t" . count($attendance) . " presenz" . ((count($attendance) === 1 ? 'a' : 'e')) . "<br>";
     echo "\tPresente tutti i giorni: ";
-    if (count($presenza) == $giorni) {
-        echo "SI\n\n";
+    if (count($attendance) == $days) {
+        echo "SI<br><br>";
     } else {
-        echo "NO\n\n";
+        echo "NO<br><br>";
     }
 }
 
-echo str_repeat("-", 50) . "\n\n";
+echo str_repeat("-", 50) . "<br><br>";
 
-
-foreach ($lista_presenze as $giorno => $presenze) {
-    $presenti = $presenze;
-    $assenti = $numero_studenti - $presenti;
-    echo "Giorno $giorno: $presenti present" . ($presenti === 1 ? 'e' : 'i') . " e {$assenti} assent" . ($assenti === 1 ? 'e' : 'i') . " => \n";
+foreach ($daily_attendance as $day => $present) {
+    $absent = $number_of_students - $present;
+    $percentage = number_format(getPercentage($present, $number_of_students), 1);
+    echo "Giorno $day: $present present" . ($present === 1 ? 'e' : 'i') . " e {$absent} assent" . ($absent === 1 ? 'e' : 'i');
+    echo " => " . str_replace(".", ",", $percentage) . "%<br>";
 }
+
+
+
+
+
+function getPercentage($part, $total){
+    return ($part / $total) * 100;
+}
+
+?>

@@ -25,10 +25,10 @@ for ($day = 1; $day <= $days; $day++) {
 foreach ($students_attendance as $student => $attendance) {
     echo "$student:<br>";
     if (!count($attendance) == 0) {
-        echo "\tPresente nei giorni: " . implode(",", $attendance) . "<br>";
+        echo "&emsp;Presente nei giorni: " . implode(", ", $attendance) . "<br>";
     }
-    echo "\t" . count($attendance) . " presenz" . ((count($attendance) === 1 ? 'a' : 'e')) . "<br>";
-    echo "\tPresente tutti i giorni: ";
+    echo "&emsp;" . count($attendance) . " presenz" . ((count($attendance) === 1 ? 'a' : 'e')) . "<br>";
+    echo "&emsp;Presente tutti i giorni: ";
     if (count($attendance) == $days) {
         echo "SI<br><br>";
     } else {
@@ -45,9 +45,27 @@ foreach ($daily_attendance as $day => $present) {
     echo " => " . str_replace(".", ",", $percentage) . "%<br>";
 }
 
+echo "<br>";
+
+$max_presence = max($daily_attendance);
+$top_days = [];
+foreach($daily_attendance as $day => $present){
+    if($present === $max_presence){
+        $top_days[] = $day;
+    }
+}
+
+echo "Giorni con più presenti: " . implode(", ", $top_days) . "<br><br>";
+
+$total_presence = getTotalPresence($daily_attendance);
+
+echo "Presenze totali: $total_presence";
 
 
 
+function getTotalPresence($daily_attendance){
+    return array_sum($daily_attendance);
+}
 
 function getPercentage($part, $total){
     return ($part / $total) * 100;

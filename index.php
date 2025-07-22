@@ -1,5 +1,7 @@
 <?php
 
+// This array contains all the students associated with an empty array to store the presence
+
 $students_attendance = [
     "Andrea Bertazzoni" => [],
     "Giada Altomare" => [],
@@ -8,13 +10,17 @@ $students_attendance = [
 ];
 
 $number_of_students = count($students_attendance);
+
+// Here we define how many days we parse (7 days by default)
 $days = 7;
 
+// This array will store how many students are present in every single day
 $daily_attendance = array_fill_keys(range(1, $days), 0);
 
+// Here we randomly set the values of both the $students_attendance and $daily_attendance based on the attendances
 for ($day = 1; $day <= $days; $day++) {
     foreach ($students_attendance as $student => $attendance) {
-        $random_bool = random_int(0, 1);
+        $random_bool = random_int(0, 1); //random generator
         if ($random_bool) {
             $students_attendance[$student][] = $day;
             $daily_attendance[$day]++;
@@ -22,6 +28,7 @@ for ($day = 1; $day <= $days; $day++) {
     }
 }
 
+// Here we echo the first part of the document, showing the attendances of every students
 foreach ($students_attendance as $student => $attendance) {
     echo "$student:<br>";
     if (!count($attendance) == 0) {
@@ -49,8 +56,8 @@ echo "<br>";
 
 $max_presence = max($daily_attendance);
 $top_days = [];
-foreach($daily_attendance as $day => $present){
-    if($present === $max_presence){
+foreach ($daily_attendance as $day => $present) {
+    if ($present === $max_presence) {
         $top_days[] = $day;
     }
 }
@@ -76,8 +83,8 @@ $messages_list = [
 ];
 
 
-foreach($messages_list as $row){
-    if($row["condition"]($average_presence)){
+foreach ($messages_list as $row) {
+    if ($row["condition"]($average_presence)) {
         $presence_value = $row["message"];
     }
 }
@@ -88,23 +95,21 @@ echo "Media presenze: " . str_replace(".", ",", $average_presence) . "% ($presen
 $max_attendance = count(max($students_attendance));
 $best_students = [];
 
-foreach($students_attendance as $student => $presence){
-    if(count($presence) === $max_attendance){
+foreach ($students_attendance as $student => $presence) {
+    if (count($presence) === $max_attendance) {
         $best_students[] = $student;
     }
 }
 
 echo "Student" . (count($best_students) === 1 ? "e" : "i") . " con più presenze: " . implode(", ", $best_students) . "<br><br>";
 
-echo var_dump($max_attendance);
 
-
-function getTotalPresence(array $daily_attendance): int {
+function getTotalPresence(array $daily_attendance): int
+{
     return array_sum($daily_attendance);
 }
 
-function getPercentage(int $part, int $total): float {
+function getPercentage(int $part, int $total): float
+{
     return ($part / $total) * 100;
 }
-
-?>

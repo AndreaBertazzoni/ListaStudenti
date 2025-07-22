@@ -57,17 +57,53 @@ foreach($daily_attendance as $day => $present){
 
 echo "Giorni con più presenti: " . implode(", ", $top_days) . "<br><br>";
 
-$total_presence = getTotalPresence($daily_attendance);
+$total_students_presence = getTotalPresence($daily_attendance);
 
-echo "Presenze totali: $total_presence";
+echo "Presenze totali: $total_students_presence <br><br>";
 
 
+$max_students_presence = $days * $number_of_students;
+$average_presence = number_format(getPercentage($total_students_presence, $max_students_presence), 1);
 
-function getTotalPresence($daily_attendance){
+$presence_value = null;
+
+
+$messages_list = [
+    ["condition" => fn($x) => $x >= 0 && $x <= 24.99, "message" => "Scarsa"],
+    ["condition" => fn($x) => $x >= 25 && $x <= 49.99, "message" => "Moderata"],
+    ["condition" => fn($x) => $x >= 50 && $x <= 74.99, "message" => "Buona"],
+    ["condition" => fn($x) => $x >= 75, "message" => "Ottima"],
+];
+
+
+foreach($messages_list as $row){
+    if($row["condition"]($average_presence)){
+        $presence_value = $row["message"];
+    }
+}
+
+echo "Media presenze: " . str_replace(".", ",", $average_presence) . "% ($presence_value)<br><br>";
+
+
+$max_attendance = count(max($students_attendance));
+$best_students = [];
+
+foreach($students_attendance as $student => $presence){
+    if(count($presence) === $max_attendance){
+        $best_students[] = $student;
+    }
+}
+
+echo "Student" . (count($best_students) === 1 ? "e" : "i") . " con più presenze: " . implode(", ", $best_students) . "<br><br>";
+
+echo var_dump($max_attendance);
+
+
+function getTotalPresence(array $daily_attendance): int {
     return array_sum($daily_attendance);
 }
 
-function getPercentage($part, $total){
+function getPercentage(int $part, int $total): float {
     return ($part / $total) * 100;
 }
 

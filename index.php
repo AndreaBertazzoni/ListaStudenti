@@ -1,115 +1,152 @@
 <?php
+/**
+ * Student Attendance Tracker
+ * 
+ * This script simulates student attendance over a specified number of days,
+ * generates random attendance data, and provides various statistics about
+ * student presence and absence patterns.
+ */
 
-// This array contains all the students associated with an empty array to store the presence
-
-$students_attendance = [
+// Initialize student attendance tracking array with empty arrays for each student
+$studentAttendanceRecord = [
     "Andrea Bertazzoni" => [],
     "Giada Altomare" => [],
     "Federico Carrassi" => [],
     "Antonino Beninato" => [],
 ];
 
-$number_of_students = count($students_attendance);
+// Get total number of students
+$totalStudentCount = count($studentAttendanceRecord);
 
-// Here we define how many days we parse (7 days by default)
-$days = 7;
+// Define the number of days to track attendance (7 days by default)
+$totalDays = 7;
 
-// This array will store how many students are present in every single day
-$daily_attendance = array_fill_keys(range(1, $days), 0);
+// Initialize daily attendance counter array with zeros for each day
+$dailyAttendanceCount = array_fill_keys(range(1, $totalDays), 0);
 
-// Here we randomly set the values of both the $students_attendance and $daily_attendance based on the attendances
-for ($day = 1; $day <= $days; $day++) {
-    foreach ($students_attendance as $student => $attendance) {
-        $random_bool = random_int(0, 1); //random generator
-        if ($random_bool) {
-            $students_attendance[$student][] = $day;
-            $daily_attendance[$day]++;
+// Generate random attendance data for each student on each day
+for ($currentDay = 1; $currentDay <= $totalDays; $currentDay++) {
+    foreach ($studentAttendanceRecord as $studentName => $attendanceDays) {
+        // Generate random boolean (0 or 1) to determine attendance
+        $isPresent = random_int(0, 1);
+        
+        if ($isPresent) {
+            // Add current day to student's attendance record
+            $studentAttendanceRecord[$studentName][] = $currentDay;
+            // Increment daily attendance counter
+            $dailyAttendanceCount[$currentDay]++;
         }
     }
 }
 
-// Here we echo the first part of the document, showing the attendances of every students
-foreach ($students_attendance as $student => $attendance) {
-    echo "$student:<br>";
-    if (!count($attendance) == 0) {
-        echo "&emsp;Presente nei giorni: " . implode(", ", $attendance) . "<br>";
+// Display individual student attendance information
+foreach ($studentAttendanceRecord as $studentName => $attendanceDays) {
+    echo "$studentName:<br>";
+    
+    // Show days when student was present (only if there are any)
+    if (!count($attendanceDays) == 0) {
+        echo "&emsp;Presente nei giorni: " . implode(", ", $attendanceDays) . "<br>";
     }
-    echo "&emsp;" . count($attendance) . " presenz" . ((count($attendance) === 1 ? 'a' : 'e')) . "<br>";
+    
+    // Display total number of presences with correct Italian grammar
+    echo "&emsp;" . count($attendanceDays) . " presenz" . ((count($attendanceDays) === 1 ? 'a' : 'e')) . "<br>";
+    
+    // Check if student was present every day
     echo "&emsp;Presente tutti i giorni: ";
-    if (count($attendance) == $days) {
+    if (count($attendanceDays) == $totalDays) {
         echo "SI<br><br>";
     } else {
         echo "NO<br><br>";
     }
 }
 
+// Print separator line
 echo str_repeat("-", 50) . "<br><br>";
 
-foreach ($daily_attendance as $day => $present) {
-    $absent = $number_of_students - $present;
-    $percentage = number_format(getPercentage($present, $number_of_students), 1);
-    echo "Giorno $day: $present present" . ($present === 1 ? 'e' : 'i') . " e {$absent} assent" . ($absent === 1 ? 'e' : 'i');
-    echo " => " . str_replace(".", ",", $percentage) . "%<br>";
+// Display daily attendance statistics
+foreach ($dailyAttendanceCount as $dayNumber => $presentCount) {
+    $absentCount = $totalStudentCount - $presentCount;
+    $attendancePercentage = number_format(calculatePercentage($presentCount, $totalStudentCount), 1);
+    
+    // Display day statistics with proper Italian grammar for singular/plural
+    echo "Giorno $dayNumber: $presentCount present" . ($presentCount === 1 ? 'e' : 'i') . 
+         " e {$absentCount} assent" . ($absentCount === 1 ? 'e' : 'i');
+    echo " => " . str_replace(".", ",", $attendancePercentage) . "%<br>";
 }
 
 echo "<br>";
 
-$max_presence = max($daily_attendance);
-$top_days = [];
-foreach ($daily_attendance as $day => $present) {
-    if ($present === $max_presence) {
-        $top_days[] = $day;
+// Find and display days with highest attendance
+$maxDailyPresence = max($dailyAttendanceCount);
+$daysWithMaxAttendance = [];
+
+foreach ($dailyAttendanceCount as $dayNumber => $presentCount) {
+    if ($presentCount === $maxDailyPresence) {
+        $daysWithMaxAttendance[] = $dayNumber;
     }
 }
 
-echo "Giorni con più presenti: " . implode(", ", $top_days) . "<br><br>";
+echo "Giorni con più presenti: " . implode(", ", $daysWithMaxAttendance) . "<br><br>";
 
-$total_students_presence = getTotalPresence($daily_attendance);
+// Calculate and display total presence statistics
+$totalPresenceCount = calculateTotalPresence($dailyAttendanceCount);
+echo "Presenze totali: $totalPresenceCount <br><br>";
 
-echo "Presenze totali: $total_students_presence <br><br>";
+// Calculate overall attendance percentage and categorize it
+$maxPossiblePresences = $totalDays * $totalStudentCount;
+$overallAttendancePercentage = number_format(calculatePercentage($totalPresenceCount, $maxPossiblePresences), 1);
+$attendanceCategory = null;
 
-
-$max_students_presence = $days * $number_of_students;
-$average_presence = number_format(getPercentage($total_students_presence, $max_students_presence), 1);
-
-$presence_value = null;
-
-
-$messages_list = [
-    ["condition" => fn($x) => $x >= 0 && $x <= 24.99, "message" => "Scarsa"],
-    ["condition" => fn($x) => $x >= 25 && $x <= 49.99, "message" => "Moderata"],
-    ["condition" => fn($x) => $x >= 50 && $x <= 74.99, "message" => "Buona"],
-    ["condition" => fn($x) => $x >= 75, "message" => "Ottima"],
+// Define attendance quality categories with conditions
+$attendanceCategories = [
+    ["condition" => fn($percentage) => $percentage >= 0 && $percentage <= 24.99, "message" => "Scarsa"],
+    ["condition" => fn($percentage) => $percentage >= 25 && $percentage <= 49.99, "message" => "Moderata"],
+    ["condition" => fn($percentage) => $percentage >= 50 && $percentage <= 74.99, "message" => "Buona"],
+    ["condition" => fn($percentage) => $percentage >= 75, "message" => "Ottima"],
 ];
 
-
-foreach ($messages_list as $row) {
-    if ($row["condition"]($average_presence)) {
-        $presence_value = $row["message"];
+// Determine attendance category based on percentage
+foreach ($attendanceCategories as $category) {
+    if ($category["condition"]($overallAttendancePercentage)) {
+        $attendanceCategory = $category["message"];
     }
 }
 
-echo "Media presenze: " . str_replace(".", ",", $average_presence) . "% ($presence_value)<br><br>";
+echo "Media presenze: " . str_replace(".", ",", $overallAttendancePercentage) . "% ($attendanceCategory)<br><br>";
 
+// Find and display students with highest attendance
+$maxStudentAttendance = count(max($studentAttendanceRecord));
+$topAttendingStudents = [];
 
-$max_attendance = count(max($students_attendance));
-$best_students = [];
-
-foreach ($students_attendance as $student => $presence) {
-    if (count($presence) === $max_attendance) {
-        $best_students[] = $student;
+foreach ($studentAttendanceRecord as $studentName => $attendanceDays) {
+    if (count($attendanceDays) === $maxStudentAttendance) {
+        $topAttendingStudents[] = $studentName;
     }
 }
 
-echo "Student" . (count($best_students) === 1 ? "e" : "i") . " con più presenze: " . implode(", ", $best_students) . "<br><br>";
+// Display top attending students with proper grammar
+echo "Student" . (count($topAttendingStudents) === 1 ? "e" : "i") . 
+     " con più presenze: " . implode(", ", $topAttendingStudents) . "<br><br>";
 
-
-function getTotalPresence(array $daily_attendance): int
+/**
+ * Calculate the total number of presences across all days
+ * 
+ * @param array $dailyAttendanceData Array containing daily attendance counts
+ * @return int Total number of presences
+ */
+function calculateTotalPresence(array $dailyAttendanceData): int
 {
-    return array_sum($daily_attendance);
+    return array_sum($dailyAttendanceData);
 }
 
-function getPercentage(int $part, int $total): float
+/**
+ * Calculate percentage of a part relative to the total
+ * 
+ * @param int $partValue The part value
+ * @param int $totalValue The total value
+ * @return float The calculated percentage
+ */
+function calculatePercentage(int $partValue, int $totalValue): float
 {
-    return ($part / $total) * 100;
+    return ($partValue / $totalValue) * 100;
 }

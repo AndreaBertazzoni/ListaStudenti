@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Student Attendance Tracker
  * 
@@ -13,14 +14,14 @@ $studentAttendanceRecord = [
     "Federico Verdi" => [],
     "Francesco Bianchi" => [],
     "Giacomo Leopardi" => [],
-    "Mario Soldati" => [],   
+    "Mario Soldati" => [],
 ];
 
 // Get total number of students
 $totalStudentCount = count($studentAttendanceRecord);
 
 // Validate if there are any students, otherwise the program will display an error message and stop running
-if($totalStudentCount <= 0){
+if ($totalStudentCount <= 0) {
     die("Errore: la lista studenti risulta vuota.");
 }
 
@@ -28,7 +29,7 @@ if($totalStudentCount <= 0){
 $totalDays = 7;
 
 // Validate if the day's number is positive, otherwise the program will display an error message and stop running
-if($totalDays <= 0){
+if ($totalDays <= 0) {
     die("Errore: il numero di giorni deve essere positivo.");
 }
 
@@ -40,7 +41,7 @@ for ($currentDay = 1; $currentDay <= $totalDays; $currentDay++) {
     foreach ($studentAttendanceRecord as $studentName => $attendanceDays) {
         // Generate random boolean (0 or 1) to determine attendance
         $isPresent = random_int(0, 1);
-        
+
         if ($isPresent) {
             // Add current day to student's attendance record
             $studentAttendanceRecord[$studentName][] = $currentDay;
@@ -53,15 +54,15 @@ for ($currentDay = 1; $currentDay <= $totalDays; $currentDay++) {
 // Display individual student attendance information
 foreach ($studentAttendanceRecord as $studentName => $attendanceDays) {
     echo "$studentName:<br>";
-    
+
     // Show days when student was present (only if there are any)
     if (!count($attendanceDays) == 0) {
         echo "&emsp;Presente nei giorni: " . implode(", ", $attendanceDays) . "<br>";
     }
-    
+
     // Display total number of presences with correct Italian grammar
-    echo "&emsp;" . count($attendanceDays) . " presenz" . ((count($attendanceDays) === 1 ? 'a' : 'e')) . "<br>";
-    
+    echo "&emsp;" . count($attendanceDays) . " presenz" . pluralize($attendanceDays, "a", "e") . "<br>";
+
     // Check if student was present every day
     echo "&emsp;Presente tutti i giorni: ";
     if (count($attendanceDays) == $totalDays) {
@@ -78,10 +79,10 @@ echo str_repeat("-", 50) . "<br><br>";
 foreach ($dailyAttendanceCount as $dayNumber => $presentCount) {
     $absentCount = $totalStudentCount - $presentCount;
     $attendancePercentage = number_format(calculatePercentage($presentCount, $totalStudentCount), 1);
-    
+
     // Display day statistics with proper Italian grammar for singular/plural
     echo "Giorno $dayNumber: $presentCount present" . pluralize($presentCount, "e", "i") .
-         " e {$absentCount} assent" . pluralize($absentCount, "e", "i");
+        " e {$absentCount} assent" . pluralize($absentCount, "e", "i");
     echo " => " . formatPercentage($attendancePercentage) . "<br>";
 }
 
@@ -136,8 +137,8 @@ foreach ($studentAttendanceRecord as $studentName => $attendanceDays) {
 }
 
 // Display top attending students with proper grammar
-echo "Student" . (count($topAttendingStudents) === 1 ? "e" : "i") . 
-     " con più presenze: " . implode(", ", $topAttendingStudents) . "<br><br>";
+echo "Student" . (count($topAttendingStudents) === 1 ? "e" : "i") .
+    " con più presenze: " . implode(", ", $topAttendingStudents) . "<br><br>";
 
 /**
  * Calculate the total number of presences across all days
@@ -159,6 +160,9 @@ function calculateTotalPresence(array $dailyAttendanceData): int
  */
 function calculatePercentage(int $partValue, int $totalValue): float
 {
+    if ($totalValue === 0) {
+        throw new Exception("Divisione con numero 0 non consentita.");
+    }
     return ($partValue / $totalValue) * 100;
 }
 

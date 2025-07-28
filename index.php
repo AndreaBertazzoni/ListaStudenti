@@ -9,17 +9,28 @@
 
 // Initialize student attendance tracking array with empty arrays for each student
 $studentAttendanceRecord = [
-    "Andrea Bertazzoni" => [],
-    "Giada Altomare" => [],
-    "Federico Carrassi" => [],
-    "Antonino Beninato" => [],
+    "Andrea Rossi" => [],
+    "Federico Verdi" => [],
+    "Francesco Bianchi" => [],
+    "Giacomo Leopardi" => [],
+    "Mario Soldati" => [],   
 ];
 
 // Get total number of students
 $totalStudentCount = count($studentAttendanceRecord);
 
+// Validate if there are any students, otherwise the program will display an error message and stop running
+if($totalStudentCount <= 0){
+    die("Errore: la lista studenti risulta vuota.");
+}
+
 // Define the number of days to track attendance (7 days by default)
 $totalDays = 7;
+
+// Validate if the day's number is positive, otherwise the program will display an error message and stop running
+if($totalDays <= 0){
+    die("Errore: il numero di giorni deve essere positivo.");
+}
 
 // Initialize daily attendance counter array with zeros for each day
 $dailyAttendanceCount = array_fill_keys(range(1, $totalDays), 0);
@@ -69,9 +80,9 @@ foreach ($dailyAttendanceCount as $dayNumber => $presentCount) {
     $attendancePercentage = number_format(calculatePercentage($presentCount, $totalStudentCount), 1);
     
     // Display day statistics with proper Italian grammar for singular/plural
-    echo "Giorno $dayNumber: $presentCount present" . ($presentCount === 1 ? 'e' : 'i') . 
-         " e {$absentCount} assent" . ($absentCount === 1 ? 'e' : 'i');
-    echo " => " . str_replace(".", ",", $attendancePercentage) . "%<br>";
+    echo "Giorno $dayNumber: $presentCount present" . pluralize($presentCount, "e", "i") .
+         " e {$absentCount} assent" . pluralize($absentCount, "e", "i");
+    echo " => " . formatPercentage($attendancePercentage) . "<br>";
 }
 
 echo "<br>";
@@ -112,7 +123,7 @@ foreach ($attendanceCategories as $category) {
     }
 }
 
-echo "Media presenze: " . str_replace(".", ",", $overallAttendancePercentage) . "% ($attendanceCategory)<br><br>";
+echo "Media presenze: " . formatPercentage($overallAttendancePercentage) . " ($attendanceCategory)<br><br>";
 
 // Find and display students with highest attendance
 $maxStudentAttendance = count(max($studentAttendanceRecord));
@@ -149,4 +160,22 @@ function calculateTotalPresence(array $dailyAttendanceData): int
 function calculatePercentage(int $partValue, int $totalValue): float
 {
     return ($partValue / $totalValue) * 100;
+}
+
+/**
+ * Format the percentage with one decimal number and the % sign at the end
+ * 
+ * @param float $value the number we want to format
+ */
+function formatPercentage($value): string
+{
+    return str_replace(".", ",", $value) . "%";
+}
+
+/**
+ * Format the output based on singular or plural (in italian)
+ */
+function pluralize($count, $singular, $plural): string
+{
+    return $count === 1 ? $singular : $plural;
 }
